@@ -99,4 +99,17 @@ export class ProductService {
     const categories = [...new Set(this.mockProducts.map(p => p.category))];
     return of(categories);
   }
+
+  /**
+   * Cria um novo produto (mock) e retorna o produto criado.
+   * Em um backend real isso faria um POST para a API.
+   */
+  createProduct(product: Product): Observable<Product> {
+    // garante id único simples para mock
+    if (!product.id) {
+      product.id = Date.now().toString();
+    }
+    this.mockProducts.push(product);
+    return of(product);
+  }
 }

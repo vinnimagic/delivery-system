@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/restaurant-dashboard/restaurant-dashboard.component').then(m => m.RestaurantDashboardComponent)
   },
   {
+    path: 'criarpedidos',
+    loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CriarpedidosComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }
