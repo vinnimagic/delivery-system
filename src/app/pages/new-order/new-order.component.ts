@@ -382,6 +382,8 @@ export class NewOrderComponent implements OnInit {
   cartItems: OrderItem[] = [];
   customerForm: FormGroup;
   isSubmitting = false;
+  // If navigated from CriarPratos, we'll receive the created dish in history.state
+  pendingCreatedDish: any = null;
 
   constructor(
     private productService: ProductService,
@@ -393,6 +395,12 @@ export class NewOrderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // check navigation state for a created dish
+    const st: any = window.history.state;
+    if (st && st.createdDish) {
+      this.pendingCreatedDish = st.createdDish;
+    }
+
     this.loadProducts();
   }
 
@@ -407,6 +415,34 @@ export class NewOrderComponent implements OnInit {
   loadProducts(): void {
     this.productService.getProducts().subscribe(products => {
       this.products = products;
+      // if we have a created dish from the previous page, inject it into the product list and add to cart
+      if (this.pendingCreatedDish) {
+        const d = this.pendingCreatedDish;
+        const generatedId = d.id ? String(d.id) : `new-${Date.now()}`;
+        const product: Product = {
+          id: generatedId,
+          name: d.name || 'Novo Prato',
+          description: d.description || '',
+          price: Number(d.price) || 0,
+          category: 'Pratos',
+          imageUrl: '',
+          available: d.available === undefined ? true : Boolean(d.available)
+        };
+        // Avoid duplicates
+        const exists = this.products.some(p => p.id === product.id || p.name === product.name);
+        if (!exists) {
+          this.products.unshift(product);
+        }
+        // add to cart directly
+        this.cartItems.push({
+          productId: product.id,
+          productName: product.name,
+          quantity: 1,
+          price: product.price
+        });
+        // clear pending
+        this.pendingCreatedDish = null;
+      }
     });
   }
 
