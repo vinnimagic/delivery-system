@@ -18,13 +18,8 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/restaurant-dashboard/restaurant-dashboard.component').then(m => m.RestaurantDashboardComponent)
   },
   {
-<<<<<<< HEAD
     path: 'criarpratos',
     loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CriarPratosComponent)
-=======
-    path: 'criarpedidos',
-    loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CriarpedidosComponent)
->>>>>>> fd4334cea9ff87863b5ebad1162764cda55febf3
   },
   {
     path: '**',
