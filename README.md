@@ -1,59 +1,83 @@
-# DeliverySystem
+# 🍕 Delivery System
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.5.
+Sistema de delivery completo desenvolvido com **Angular 21** e **TypeScript**.
 
-## Development server
+## 🚀 Tecnologias Principais
 
-To start a local development server, run:
+### **Frontend & Framework**
+- **Angular 21** - Framework principal
+- **TypeScript** - Linguagem de programação
+- **RxJS** - Programação reativa
+- **Standalone Components** - Arquitetura moderna
 
-```bash
-ng serve
-```
+### **Estilização & UI**
+- **CSS3/SCSS** - Estilização
+- **Angular Material** - Componentes UI (opcional)
+- **Responsive Design** - Mobile-first
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### **Funcionalidades & Estado**
+- **LocalStorage** - Persistência de dados
+- **Services** - Gerenciamento de estado
+- **Reactive Forms** - Formulários
+- **Router** - Navegação SPA
 
-## Code scaffolding
+## 📦 Funcionalidades
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 👤 **Para Clientes**
+- Fazer pedidos com carrinho
+- Acompanhar pedidos em tempo real
+- Histórico de pedidos
+- Interface responsiva
 
-```bash
-ng generate component component-name
-```
+### 🏪 **Para Restaurantes** 
+- Gerenciar pedidos
+- Atualizar status
+- Cadastrar novos produtos
+- Dashboard administrativo
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## 🛠️ Instalação Rápida
 
 ```bash
-ng test
+# Clone o projeto
+git clone https://github.com/seu-usuario/delivery-system.git
+cd delivery-system
+
+# Instale dependências
+npm install
+
+# Execute
+npm start
 ```
 
-## Running end-to-end tests
+Acesse: **http://localhost:4200**
 
-For end-to-end (e2e) testing, run:
+## 🎯 Estrutura Técnica
+
+```
+src/app/
+├── 📄 pages/           # Páginas (Home, Pedidos, Restaurante)
+├── 🔧 services/        # Lógica de negócio (Order, Product)
+├── 📊 models/          # Interfaces TypeScript
+├── 🛡️ guards/          # Proteção de rotas
+└── 🎨 components/      # Componentes reutilizáveis
+```
+
+## 💻 Comandos Desenvolvimento
 
 ```bash
-ng e2e
+npm start          # Desenvolvimento
+npm run build      # Build produção
+ng test           # Testes
+ng generate       # Gerar componentes
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 🌟 Destaques Técnicos
 
-## Additional Resources
+- **Angular 21** - Última versão com performance otimizada
+- **TypeScript** - Tipagem estática e IntelliSense
+- **Standalone** - Componentes auto-suficientes
+- **RxJS** - Streams reativos para dados em tempo real
+- **LocalStorage** - Dados persistentes no navegador
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
+
