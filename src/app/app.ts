@@ -13,11 +13,10 @@ import { RouterOutlet, RouterModule } from '@angular/router';
           <a routerLink="/" class="nav-link">Início</a>
           <a routerLink="/novo-pedido" class="nav-link">Fazer Pedido</a>
           <a routerLink="/restaurante" class="nav-link">Restaurante</a>
-<<<<<<< HEAD
           <a routerLink="/criarpratos" class="nav-link">Criar pratos</a>
-=======
-          <a routerLink="/criarpedidos" class="nav-link">Criar Pratos</a>
->>>>>>> fd4334cea9ff87863b5ebad1162764cda55febf3
+
+ 
+
         </div>
       </div>
     </nav>
