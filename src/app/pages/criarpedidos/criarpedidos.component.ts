@@ -1,81 +1,70 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Product } from '../../models/product.model';
+import { Router, RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-criarpedidos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './criarpedidos.component.html',
   styleUrls: ['./criarpedidos.component.scss']
 })
-export class CriarpedidosComponent implements OnInit {
-  productForm: FormGroup;
-  submitting = false;
-  successMessage = '';
-  errorMessage = '';
-  categories: string[] = [];
+export class CriarPedidosComponent implements OnInit {
+
+  form: FormGroup;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
+    private router: Router,
     private productService: ProductService
   ) {
-    this.productForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(500)]],
-      price: [null, [Validators.required, Validators.min(0)]],
-      category: ['', [Validators.required]],
-      imageUrl: ['', [Validators.maxLength(500)]],
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      description: [''],
+      price: [0, [Validators.required, Validators.min(0)]],
       available: [true]
     });
   }
 
-  ngOnInit(): void {
-    // 🍔 Categorias típicas de hamburgueria
-    this.categories = ['Hambúrguer', 'Acompanhamento', 'Bebida', 'Combo', 'Sobremesa'];
+  ngOnInit(): void {}
 
-    // Caso ainda queira buscar da API:
-    // this.productService.getCategories().subscribe(cats => this.categories = cats);
-  }
-
-  get f() {
-    return this.productForm.controls;
-  }
-
-  onSubmit(): void {
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    if (this.productForm.invalid) {
-      this.productForm.markAllAsTouched();
+  submit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    this.submitting = true;
+    this.loading = true;
 
     const newProduct: Product = {
       id: '',
-      name: this.productForm.get('name')?.value,
-      description: this.productForm.get('description')?.value,
-      price: Number(this.productForm.get('price')?.value),
-      category: this.productForm.get('category')?.value,
-      imageUrl: this.productForm.get('imageUrl')?.value || '/assets/images/default-burger.jpg',
-      available: !!this.productForm.get('available')?.value
+      name: this.form.value.name,
+      description: this.form.value.description,
+      price: this.form.value.price,
+      available: this.form.value.available,
+      category: 'Outros',
+      imageUrl: ''
     };
 
     this.productService.createProduct(newProduct).subscribe({
-      next: (p) => {
-        this.successMessage = `Produto "${p.name}" criado com sucesso.`;
-        this.productForm.reset({ available: true });
-        // Atualiza categorias, se necessário
-        this.submitting = false;
+      next: () => {
+        this.loading = false;
+
+        this.form.reset({
+          name: '',
+          description: '',
+          price: 0,
+          available: true
+        });
+
+        this.router.navigate(['/home']);
       },
-      error: (err) => {
-        console.error('Erro ao criar produto', err);
-        this.errorMessage = 'Ocorreu um erro ao criar o produto. Tente novamente.';
-        this.submitting = false;
+      error: () => {
+        this.loading = false;
       }
     });
   }

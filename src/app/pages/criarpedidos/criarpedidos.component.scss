@@ -1,104 +1,113 @@
-/* Container principal */
-.form-wrapper {
-  max-width: 600px;
-  margin: 2rem auto;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
+// criarpedidos.component.scss
+
+$bg: #f6f7fb;
+$card-bg: #ffffff;
+$primary: #0f62fe;
+$primary-600: #0747a6;
+$accent: #00bfa6;
+$text: #0f1724;
+$muted: #6b7280;
+$error: #e02424;
+$success: #16a34a;
+$shadow: 0 8px 28px rgba(15,22,36,0.06);
+$radius: 12px;
+$gap: 18px;
+
+$form-bg-start: #f4f9ff;
+$form-bg-end: #ffffff;
+
+$breakpoint-md: 920px;
+$breakpoint-sm: 640px;
+
+@mixin respond-to($bp) {
+  @if $bp == md {
+    @media (min-width: $breakpoint-md) { @content; }
+  } @else if $bp == sm {
+    @media (min-width: $breakpoint-sm) { @content; }
+  }
 }
 
-/* Título */
-.form-wrapper h2 {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+.criar-pedidos { box-sizing: border-box; }
+.criar-pedidos *, .criar-pedidos *::before, .criar-pedidos *::after { box-sizing: inherit; }
 
-/* Campos */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
+.criar-pedidos {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $bg 0%, lighten($bg, 1%) 100%);
+  padding: 20px;
+  color: $text;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 
-label {
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.4rem;
-}
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $gap;
 
-input,
-textarea,
-select {
-  padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  outline: none;
-  background: #f9fafb;
-  transition: all 0.2s ease;
-  font-size: 1rem;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
-}
-
-/* Checkbox */
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
-}
-
-.checkbox-group label {
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Botão principal */
-button {
-  width: 100%;
-  padding: 0.9rem;
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
-  border: none;
-  color: white;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-button:hover {
-  background: linear-gradient(90deg, #4338ca, #6d28d9);
-  transform: translateY(-1px);
-}
-
-/* Placeholder mais legível */
-::placeholder {
-  color: #9ca3af;
-  font-size: 0.95rem;
-}
-
-/* Responsividade */
-@media (max-width: 480px) {
-  .form-wrapper {
-    padding: 1.2rem;
+    @include respond-to(md) {
+      grid-template-columns: 1fr 360px;
+      align-items: start;
+      gap: 28px;
+    }
   }
 
-  h2 {
-    font-size: 1.5rem;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $gap;
+    margin-bottom: 4px;
+
+    .title h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+    .title p { margin: 0; color: $muted; font-size: 0.95rem; }
+  }
+
+  .card {
+    background: $card-bg;
+    border-radius: $radius;
+    box-shadow: $shadow;
+    padding: 18px;
+    border: 1px solid rgba(15,22,36,0.04);
+  }
+
+  .form {
+    .card { 
+      padding: 22px; 
+      background: linear-gradient(180deg, $form-bg-start 0%, $form-bg-end 100%);
+      border: 1px solid rgba(15,22,36,0.05);
+      box-shadow: 0 14px 40px rgba(15,22,36,0.06);
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+
+      @include respond-to(sm) { grid-template-columns: 1fr 240px; }
+      @include respond-to(md) { grid-template-columns: 1fr 320px; }
+    }
+
+    .form-group { display: flex; flex-direction: column; }
+
+    label { font-size: 0.9rem; color: $muted; margin-bottom: 8px; }
+
+    input[type="text"], input[type="number"], select, textarea {
+      height: 46px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(15,22,36,0.06);
+      background: #fff;
+      color: $text;
+      font-size: 0.95rem;
+    }
+
+    textarea { min-height: 100px; }
+
+    .form-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 12px; }
+
+    .btn-primary { background: $primary; color: white; }
+    .btn-primary:hover { background: $primary-600; }
   }
 }
