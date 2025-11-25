@@ -19,7 +19,7 @@ export const routes: Routes = [
   },
   {
     path: 'criarpratos',
-    loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CriarPratosComponent)
+    loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CreateDishComponent)
   },
   {
     path: '**',

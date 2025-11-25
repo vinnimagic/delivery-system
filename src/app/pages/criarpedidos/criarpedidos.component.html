@@ -1,53 +1,95 @@
-<div class="criar-pedidos">
-		<div class="container">
-			<div class="form card">
-				<div class="header">
-					<div class="title">
-						<h1>Criar Prato</h1>
-						<p>Cadastre um novo prato no cardápio</p>
-					</div>
-							
-				</div>
+<div class="create-dish-container">
+  <h2>Cadastrar Novo Prato</h2>
 
-				<form [formGroup]="form" (ngSubmit)="submit()">
-					<div class="form-grid">
-						<div>
-							<div class="form-group">
-								<label>Nome do Prato</label>
-								<input type="text" formControlName="name" placeholder="Ex: Lasanha de Frango" />
-							</div>
+  <!-- Mensagem de erro -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
 
-							<div class="form-group">
-								<label>Descrição</label>
-								<textarea formControlName="description" placeholder="Ingredientes, observações..."></textarea>
-							</div>
+  <form [formGroup]="form" (ngSubmit)="save()" class="dish-form">
+    
+    <!-- Nome -->
+    <div class="form-group">
+      <label for="name">Nome do Prato *</label>
+      <input 
+        type="text" 
+        id="name" 
+        formControlName="name"
+        placeholder="Ex: Pizza Margherita"
+        [class.error]="hasError('name', 'required') || hasError('name', 'minlength')">
+      
+      <div *ngIf="hasError('name', 'required')" class="field-error">
+        Nome é obrigatório
+      </div>
+      <div *ngIf="hasError('name', 'minlength')" class="field-error">
+        Nome deve ter pelo menos 2 caracteres
+      </div>
+    </div>
 
-							<div class="form-row">
-								<div class="form-group">
-									<label>Preço (R$)</label>
-									<input type="number" formControlName="price" step="0.01" />
-								</div>
-								<div class="form-group">
-									<label>
-										<input type="checkbox" formControlName="available" /> Disponível
-									</label>
-								</div>
-							</div>
+    <!-- Descrição -->
+    <div class="form-group">
+      <label for="description">Descrição *</label>
+      <textarea 
+        id="description" 
+        formControlName="description"
+        placeholder="Descreva o prato..."
+        rows="3"
+        [class.error]="hasError('description', 'required') || hasError('description', 'minlength')"></textarea>
+      
+      <div *ngIf="hasError('description', 'required')" class="field-error">
+        Descrição é obrigatória
+      </div>
+      <div *ngIf="hasError('description', 'minlength')" class="field-error">
+        Descrição deve ter pelo menos 5 caracteres
+      </div>
+    </div>
 
-										<div class="form-actions">
-											<button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Salvando...' : 'Salvar Prato' }}</button>
-										</div>
-						</div>
+    <!-- Preço -->
+    <div class="form-group">
+      <label for="price">Preço (R$) *</label>
+      <input 
+        type="number" 
+        id="price" 
+        formControlName="price"
+        min="0.01"
+        max="1000"
+        step="0.01"
+        placeholder="0.00"
+        [class.error]="hasError('price', 'required') || hasError('price', 'min')">
+      
+      <div *ngIf="hasError('price', 'required')" class="field-error">
+        Preço é obrigatório
+      </div>
+      <div *ngIf="hasError('price', 'min')" class="field-error">
+        Preço deve ser maior que R$ 0,00
+      </div>
+    </div>
 
-						<aside class="card">
-							<h3>Preview</h3>
-							<p><strong>Nome:</strong> {{ form.get('name')?.value || '—' }}</p>
-							<p><strong>Descrição:</strong> {{ form.get('description')?.value || '—' }}</p>
-							<p><strong>Preço:</strong> R$ {{ form.get('price')?.value?.toFixed?.(2) || '0.00' }}</p>
-							<p><strong>Disponível:</strong> {{ form.get('available')?.value ? 'Sim' : 'Não' }}</p>
-						</aside>
-					</div>
-				</form>
-			</div>
-		</div>
+    <!-- Ações -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        (click)="resetForm()"
+        class="btn btn-secondary"
+        [disabled]="loading">
+        Limpar
+      </button>
+      
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="loading || form.invalid">
+        {{ loading ? 'Salvando...' : 'Salvar Prato' }}
+      </button>
+    </div>
+
+  </form>
+
+  <!-- Debug (remova em produção) -->
+  <div class="debug-info" *ngIf="false">
+    <h4>Debug Info:</h4>
+    <p>Form Valid: {{ form.valid }}</p>
+    <p>Form Value: {{ form.value | json }}</p>
+    <p>Loading: {{ loading }}</p>
+  </div>
 </div>

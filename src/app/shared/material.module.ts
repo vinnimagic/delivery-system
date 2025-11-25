@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 // Angular Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -16,11 +17,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [],
   imports: [
     CommonModule,
+    // Angular Material
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
@@ -34,10 +37,17 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatBadgeModule,
-    MatTabsModule
+    MatTabsModule,
+    // Forms
+    ReactiveFormsModule,
+    FormsModule
+  ],
+  providers: [
+    provideHttpClient(withInterceptorsFromDi())
   ],
   exports: [
     CommonModule,
+    // Angular Material
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
@@ -51,7 +61,10 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatBadgeModule,
-    MatTabsModule
+    MatTabsModule,
+    // Forms
+    ReactiveFormsModule,
+    FormsModule
   ]
 })
 export class MaterialModule { }

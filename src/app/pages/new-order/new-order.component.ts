@@ -424,9 +424,7 @@ export class NewOrderComponent implements OnInit {
           name: d.name || 'Novo Prato',
           description: d.description || '',
           price: Number(d.price) || 0,
-          category: 'Pratos',
-          imageUrl: '',
-          available: d.available === undefined ? true : Boolean(d.available)
+
         };
         // Avoid duplicates
         const exists = this.products.some(p => p.id === product.id || p.name === product.name);

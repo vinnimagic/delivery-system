@@ -1,89 +1,155 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { finalize } from 'rxjs/operators';
-
-/**
- * Componente para criar pedidos de restaurante.
- * Arquivo: /home/vinicius/delivery-system/src/app/pages/criarpedidos/criarpedidos.component.ts
- *
- * Observações:
- * - Usa Reactive Forms.
- * - Envia POST para /api/orders (ajuste conforme sua API).
- * - Adicione templates/styles correspondentes em criarpedidos.component.html/.scss
- */
-
-interface OrderItem {
-    menuItemId?: number | string;
-    name: string;
-    quantity: number;
-    price: number;
-    notes?: string;
-}
-
-interface Order {
-    customerName?: string;
-    tableNumber?: string | number;
-    items: OrderItem[];
-    delivery?: boolean;
-    address?: string;
-    total: number;
-    createdAt?: string;
-}
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DishService } from '../../services/dish.service';
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/product.model';
+import { Dish } from '../../models/dish.models'; 
 
 @Component({
-    selector: 'app-criar-pratos',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule],
-    templateUrl: './criarpedidos.component.html',
-    styleUrls: ['./criarpedidos.component.scss']
+  selector: 'app-criarpedidos',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
+  ],
+  templateUrl: './criarpedidos.component.html',
+  styleUrls: ['./criarpedidos.component.scss']
 })
-export class CriarPratosComponent implements OnInit {
-    form: FormGroup;
-    loading = false;
+export class CreateDishComponent implements OnInit {
+  
+  form!: FormGroup;
+  loading = false;
+  errorMessage: string = '';
+  successMessage: string = '';
 
-    constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
-        this.form = this.fb.group({
-            name: ['', Validators.required],
-            description: [''],
-            price: [0, [Validators.required, Validators.min(0)]],
-            available: [true]
+  constructor(
+    private fb: FormBuilder,
+    private dishService: DishService,
+    private productService: ProductService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.initializeForm();
+  }
+
+  initializeForm(): void {
+    this.form = this.fb.group({
+      name: ['', [
+        Validators.required, 
+        Validators.minLength(2),
+        Validators.maxLength(100)
+      ]],
+      description: ['', [
+        Validators.required,
+        Validators.minLength(5),
+        Validators.maxLength(500)
+      ]],
+      price: [0, [
+        Validators.required, 
+        Validators.min(0.01),
+        Validators.max(1000)
+      ]],
+      category: ['Pratos', [Validators.required]]
+    });
+  }
+
+  get name() { return this.form.get('name'); }
+  get description() { return this.form.get('description'); }
+  get price() { return this.form.get('price'); }
+  get category() { return this.form.get('category'); }
+
+  save(): void {
+    if (this.form.invalid) {
+      this.markFormGroupTouched();
+      this.errorMessage = 'Por favor, corrija os erros no formulário.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage
+
+    const dishData: Dish = {
+      name: this.form.value.name,
+      description: this.form.value.description,
+      price: this.form.value.price,
+      category: this.form.value.category
+    };
+
+    console.log('📤 Enviando para o backend:', dishData);
+
+    // ✅ SALVA NO BACKEND REAL
+    this.dishService.create(dishData).subscribe({
+      next: (createdDish) => {
+        console.log('✅ Prato salvo no backend:', createdDish);
+        
+        // ✅ ADICIONA AO MOCK LOCAL (para aparecer no pedido atual)
+        this.addToProductService(createdDish);
+        
+        // ✅ REDIRECIONA PARA O PEDIDO
+        this.router.navigate(['/novo-pedido'], {
+          state: { createdDish: createdDish }
         });
-    }
-
-    ngOnInit(): void {
-        // nada especial por enquanto
-    }
-
-    submit(): void {
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
+        alert('Prato criado com sucesso!');
+        this.successMessage = 'Prato criado com sucesso!';
+        
+        this.loading = false;
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('❌ Erro ao salvar no backend:', error);
+        
+        if (error.status === 0) {
+          this.errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+        } else if (error.status === 400) {
+          this.errorMessage = 'Dados inválidos enviados para o servidor.';
+          console.error('Detalhes do erro 400:', error.error);
+        } else if (error.status === 404) {
+          this.errorMessage = 'Endpoint não encontrado. Verifique a URL da API.';
+        } else if (error.status === 500) {
+          this.errorMessage = 'Erro interno do servidor.';
+        } else {
+          this.errorMessage = `Erro ${error.status}: ${error.message}`;
         }
+      
+        
+        alert(this.errorMessage);
+      }
+    });
+  }
 
-        const dish = this.form.value;
-        this.loading = true;
+  // ✅ CONVERTE DISH (BACKEND) PARA PRODUCT (MOCK LOCAL)
+  private addToProductService(dish: Dish): void {
+    const product: Product = {
+      id: dish.id?.toString() || `dish-${Date.now()}`,
+      name: dish.name,
+      description: dish.description,
+      price: dish.price,
+    };
 
-        this.http.post('/api/dishes', dish)
-            .pipe(finalize(() => this.loading = false))
-            .subscribe({
-                next: (res: any) => {
-                    console.log('Prato criado', res);
-                    // reset form
-                    this.form.reset({ name: '', description: '', price: 0, available: true });
-                    // Navega para nova ordem — passamos o prato criado no state para uso opcional
-                    try {
-                        this.router.navigate(['/novo-pedido'], { state: { createdDish: res } });
-                    } catch (e) {
-                        // fallback sem state
-                        this.router.navigate(['/novo-pedido']);
-                    }
-                },
-                error: err => {
-                    console.error('Erro ao criar prato', err);
-                }
-            });
-    }
+    console.log('🛒 Adicionando ao mock local:', product);
+    this.productService.createProduct(product).subscribe();
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.form.controls).forEach(key => {
+      this.form.get(key)?.markAsTouched();
+    });
+  }
+
+  resetForm(): void {
+    this.form.reset({
+      category: 'Pratos',
+      price: 0
+    });
+    this.errorMessage = '';
+  }
+
+  hasError(controlName: string, errorName: string): boolean {
+    const control = this.form.get(controlName);
+    return control ? control.hasError(errorName) && control.touched : false;
+  }
 }
