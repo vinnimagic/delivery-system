@@ -20,7 +20,12 @@ export const routes: Routes = [
   {
     path: 'criarpratos',
     loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CreateDishComponent)
-  },
+  }, 
+  {
+  path: 'motoboy',
+  loadComponent: () =>
+    import('./pages/motoboy/motoboy.component').then(m => m.MotoboyComponent),
+},
   {
     path: '**',
     redirectTo: ''
