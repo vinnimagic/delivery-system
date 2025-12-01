@@ -20,10 +20,17 @@ export class CreateDishComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   errorMessage: string = '';
+  successMessage: string = '';
+  
+  // Variáveis para o modal de exclusão
+  showDeleteDialog = false;
+  products: Product[] = [];
+  selectedProductId: string | null = null;
+  loadingProducts = false;
 
   constructor(
     private fb: FormBuilder,
-    private productService: ProductService, // ✅ USA APENAS PRODUCT SERVICE
+    private productService: ProductService,
     private router: Router
   ) {}
 
@@ -52,11 +59,84 @@ export class CreateDishComponent implements OnInit {
     });
   }
 
-  get name() { return this.form.get('name'); }
-  get description() { return this.form.get('description'); }
-  get price() { return this.form.get('price'); }
-  get category() { return this.form.get('category'); }
+  // Abrir modal para selecionar prato a excluir
+  openDeleteDialog(): void {
+    this.showDeleteDialog = true;
+    this.selectedProductId = null;
+    this.loadProductsForDeletion();
+  }
 
+  // Fechar modal
+  closeDeleteDialog(): void {
+    this.showDeleteDialog = false;
+    this.selectedProductId = null;
+  }
+
+  // Carregar produtos para a lista de exclusão
+  loadProductsForDeletion(): void {
+    this.loadingProducts = true;
+    // Você precisa criar um método getAllProducts() no seu service
+    // Ou usar um método que já existe para buscar todos os produtos
+    this.productService.getProducts().subscribe({
+      next: (products) => {
+        this.products = products;
+        this.loadingProducts = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar produtos:', error);
+        this.loadingProducts = false;
+        this.errorMessage = 'Erro ao carregar lista de pratos.';
+      }
+    });
+  }
+
+  // Se você não tem getAllProducts(), pode criar um array de exemplo:
+  loadProductsForDeletionExample(): void {
+    this.loadingProducts = true;
+    // Exemplo com dados mockados (remova quando tiver API)
+    setTimeout(() => {
+      this.products = [
+        { id: '1', name: 'Pizza Margherita', description: 'Pizza tradicional com queijo', price: 45.90 },
+        { id: '2', name: 'Hambúrguer', description: 'Hambúrguer artesanal', price: 32.50 },
+        { id: '3', name: 'Salada Caesar', description: 'Salada com frango e molho caesar', price: 28.75 }
+      ];
+      this.loadingProducts = false;
+    }, 500);
+  }
+
+  // Selecionar produto na lista
+  selectProduct(productId: string): void {
+    this.selectedProductId = productId;
+  }
+
+  // Confirmar exclusão do produto selecionado
+  confirmDelete(): void {
+    if (!this.selectedProductId) return;
+    
+    const selectedProduct = this.products.find(p => p.id === this.selectedProductId);
+    const productName = selectedProduct?.name || 'este prato';
+    
+    if (confirm(`Tem certeza que deseja excluir o prato "${productName}"? Esta ação não pode ser desfeita.`)) {
+      this.loading = true;
+      this.productService.deleteProduct(this.selectedProductId).subscribe({
+        next: () => {
+          this.successMessage = `Prato "${productName}" excluído com sucesso!`;
+          this.loading = false;
+          this.closeDeleteDialog();
+          
+          // Recarregar a lista após exclusão
+          this.loadProductsForDeletion();
+        },
+        error: (error) => {
+          console.error('Erro ao excluir prato:', error);
+          this.errorMessage = 'Erro ao excluir prato. Tente novamente.';
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  // Métodos existentes (mantenha como estão)
   save(): void {
     if (this.form.invalid) {
       this.markFormGroupTouched();
@@ -66,47 +146,49 @@ export class CreateDishComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     const productData: Product = {
-      id: '', // ✅ BACKEND VAI GERAR O ID
+      id: '',
       name: this.form.value.name,
       description: this.form.value.description,
       price: this.form.value.price,
     };
 
-    console.log('📤 Enviando produto para backend:', productData);
-
-    // ✅ SALVA DIRETAMENTE NO BACKEND VIA PRODUCT SERVICE
     this.productService.createProduct(productData).subscribe({
       next: (createdProduct) => {
-        console.log('✅ Produto salvo no backend:', createdProduct);
-        
-        // ✅ REDIRECIONA PARA O PEDIDO
-        this.router.navigate(['/novo-pedido'], {
-          state: { createdDish: createdProduct }
-        });
-        
+        this.successMessage = `Prato "${createdProduct.name}" cadastrado com sucesso!`;
         this.loading = false;
+        
+        setTimeout(() => {
+          this.router.navigate(['/novo-pedido'], {
+            state: { createdDish: createdProduct }
+          });
+        }, 2000);
       },
       error: (error) => {
-        this.loading = false;
-        console.error('❌ Erro ao salvar produto no backend:', error);
-        
-        if (error.status === 0) {
-          this.errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
-        } else if (error.status === 400) {
-          this.errorMessage = 'Dados inválidos enviados para o servidor.';
-        } else if (error.status === 404) {
-          this.errorMessage = 'Endpoint não encontrado. Verifique a URL da API.';
-        } else if (error.status === 500) {
-          this.errorMessage = 'Erro interno do servidor.';
-        } else {
-          this.errorMessage = `Erro ${error.status}: ${error.message}`;
-        }
-        
-        alert(this.errorMessage);
+        this.handleError(error, 'criar');
       }
     });
+  }
+
+  private handleError(error: any, action: string): void {
+    this.loading = false;
+    console.error(`❌ Erro ao ${action} produto:`, error);
+    
+    if (error.status === 0) {
+      this.errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+    } else if (error.status === 400) {
+      this.errorMessage = 'Dados inválidos enviados para o servidor.';
+    } else if (error.status === 404) {
+      this.errorMessage = 'Endpoint não encontrado. Verifique a URL da API.';
+    } else if (error.status === 500) {
+      this.errorMessage = 'Erro interno do servidor.';
+    } else {
+      this.errorMessage = `Erro ${error.status}: ${error.message}`;
+    }
+    
+    alert(this.errorMessage);
   }
 
   private markFormGroupTouched(): void {
@@ -121,6 +203,11 @@ export class CreateDishComponent implements OnInit {
       price: 0
     });
     this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  goBack(): void {
+    this.router.navigate(['/pratos']);
   }
 
   hasError(controlName: string, errorName: string): boolean {

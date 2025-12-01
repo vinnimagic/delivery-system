@@ -1,0 +1,31 @@
+<div class="container">
+  <h2>📋 Lista de Pratos</h2>
+  
+  <!-- ⬇️ ESTE BOTÃO VAI FUNCIONAR APÓS ADICIONAR RouterLink -->
+  <button 
+    routerLink="/criar-prato"
+    class="btn btn-success mb-3">
+    ➕ Novo Prato
+  </button>
+
+  <div *ngFor="let produto of produtos" class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ produto.name }}</h5>
+      <p class="card-text">{{ produto.description }}</p>
+      <p class="card-text"><strong>Preço:</strong> R$ {{ produto.price }}</p>
+      
+      <!-- ⬇️ ESTE BOTÃO TAMBÉM VAI FUNCIONAR -->
+      <button 
+        [routerLink]="['/criar-prato', produto.id]"
+        class="btn btn-primary me-2">
+        ✏️ Editar
+      </button>
+      
+      <button 
+        (click)="excluirProduto(produto.id)"
+        class="btn btn-danger">
+        🗑️ Excluir
+      </button>
+    </div>
+  </div>
+</div>

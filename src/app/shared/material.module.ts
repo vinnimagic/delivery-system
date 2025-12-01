@@ -18,9 +18,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { App } from '../app';
 
 @NgModule({
-  declarations: [],
+  declarations: [
+  ],
   imports: [
     CommonModule,
     // Angular Material
@@ -64,7 +66,6 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     MatTabsModule,
     // Forms
     ReactiveFormsModule,
-    FormsModule
   ]
 })
 export class MaterialModule { }

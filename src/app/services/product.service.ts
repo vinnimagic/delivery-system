@@ -83,6 +83,8 @@ export class ProductService {
     };
   }
 
+  
+
   // ✅ CONVERTE PRODUCT (FRONTEND) PARA DISH (BACKEND)
   private productToDish(product: Product): Dish {
     return {
