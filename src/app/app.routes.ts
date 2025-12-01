@@ -22,6 +22,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/criarpedidos/criarpedidos.component').then(m => m.CreateDishComponent)
   },
   {
+    path: 'motoboy',
+    loadComponent: () => import('../app/pages/motoboy/motoboy.component').then(m => m.MotoboyComponent)
+
+  },
+  {
     path: '**',
     redirectTo: ''
   }

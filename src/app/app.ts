@@ -14,6 +14,7 @@ import { RouterOutlet, RouterModule } from '@angular/router';
           <a routerLink="/novo-pedido" class="nav-link">Fazer Pedido</a>
           <a routerLink="/restaurante" class="nav-link">Restaurante</a>
           <a routerLink="/criarpratos" class="nav-link">Criar pratos</a>
+          <a routerLink="/motoboy" class="nav-link">Motoboy</a>
 
  
 

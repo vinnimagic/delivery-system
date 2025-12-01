@@ -2,10 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DishService } from '../../services/dish.service';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
-import { Dish } from '../../models/dish.models'; 
 
 @Component({
   selector: 'app-criarpedidos',
@@ -22,12 +20,10 @@ export class CreateDishComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   errorMessage: string = '';
-  successMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
-    private dishService: DishService,
-    private productService: ProductService,
+    private productService: ProductService, // ✅ USA APENAS PRODUCT SERVICE
     private router: Router
   ) {}
 
@@ -70,43 +66,36 @@ export class CreateDishComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
-    this.successMessage
 
-    const dishData: Dish = {
+    const productData: Product = {
+      id: '', // ✅ BACKEND VAI GERAR O ID
       name: this.form.value.name,
       description: this.form.value.description,
       price: this.form.value.price,
-      category: this.form.value.category
     };
 
-    console.log('📤 Enviando para o backend:', dishData);
+    console.log('📤 Enviando produto para backend:', productData);
 
-    // ✅ SALVA NO BACKEND REAL
-    this.dishService.create(dishData).subscribe({
-      next: (createdDish) => {
-        console.log('✅ Prato salvo no backend:', createdDish);
-        
-        // ✅ ADICIONA AO MOCK LOCAL (para aparecer no pedido atual)
-        this.addToProductService(createdDish);
+    // ✅ SALVA DIRETAMENTE NO BACKEND VIA PRODUCT SERVICE
+    this.productService.createProduct(productData).subscribe({
+      next: (createdProduct) => {
+        console.log('✅ Produto salvo no backend:', createdProduct);
         
         // ✅ REDIRECIONA PARA O PEDIDO
         this.router.navigate(['/novo-pedido'], {
-          state: { createdDish: createdDish }
+          state: { createdDish: createdProduct }
         });
-        alert('Prato criado com sucesso!');
-        this.successMessage = 'Prato criado com sucesso!';
         
         this.loading = false;
       },
       error: (error) => {
         this.loading = false;
-        console.error('❌ Erro ao salvar no backend:', error);
+        console.error('❌ Erro ao salvar produto no backend:', error);
         
         if (error.status === 0) {
           this.errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
         } else if (error.status === 400) {
           this.errorMessage = 'Dados inválidos enviados para o servidor.';
-          console.error('Detalhes do erro 400:', error.error);
         } else if (error.status === 404) {
           this.errorMessage = 'Endpoint não encontrado. Verifique a URL da API.';
         } else if (error.status === 500) {
@@ -114,24 +103,10 @@ export class CreateDishComponent implements OnInit {
         } else {
           this.errorMessage = `Erro ${error.status}: ${error.message}`;
         }
-      
         
         alert(this.errorMessage);
       }
     });
-  }
-
-  // ✅ CONVERTE DISH (BACKEND) PARA PRODUCT (MOCK LOCAL)
-  private addToProductService(dish: Dish): void {
-    const product: Product = {
-      id: dish.id?.toString() || `dish-${Date.now()}`,
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-    };
-
-    console.log('🛒 Adicionando ao mock local:', product);
-    this.productService.createProduct(product).subscribe();
   }
 
   private markFormGroupTouched(): void {
