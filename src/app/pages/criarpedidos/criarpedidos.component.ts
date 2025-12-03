@@ -24,9 +24,12 @@ export class CreateDishComponent implements OnInit {
   
   // Variáveis para o modal de exclusão
   showDeleteDialog = false;
+  // Variáveis para o modal de edição
+  showEditDialog = false;
   products: Product[] = [];
   selectedProductId: string | null = null;
   loadingProducts = false;
+  editingProductId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -70,6 +73,67 @@ export class CreateDishComponent implements OnInit {
   closeDeleteDialog(): void {
     this.showDeleteDialog = false;
     this.selectedProductId = null;
+  }
+
+  // Abrir modal para editar prato
+  openEditDialog(): void {
+    this.showEditDialog = true;
+    this.selectedProductId = null;
+    this.loadProductsForEdit();
+  }
+
+  // Fechar modal de edição
+  closeEditDialog(): void {
+    this.showEditDialog = false;
+    this.selectedProductId = null;
+  }
+
+  // Carregar produtos para a lista de edição
+  loadProductsForEdit(): void {
+    this.loadingProducts = true;
+    this.productService.getProducts().subscribe({
+      next: (products) => {
+        this.products = products;
+        this.loadingProducts = false;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar produtos:', error);
+        this.loadingProducts = false;
+        this.errorMessage = 'Erro ao carregar lista de pratos.';
+      }
+    });
+  }
+
+  // Selecionar produto para editar
+  selectProductForEdit(productId: string): void {
+    this.selectedProductId = productId;
+  }
+
+  // Carregar o prato selecionado no formulário para edição
+  loadSelectedDishForEdit(): void {
+    if (!this.selectedProductId) return;
+
+    const selectedProduct = this.products.find(p => p.id === this.selectedProductId);
+    
+    if (selectedProduct) {
+      // Preencher o formulário com os dados do prato selecionado
+      this.form.patchValue({
+        name: selectedProduct.name,
+        description: selectedProduct.description,
+        price: selectedProduct.price,
+        category: 'Pratos'
+      });
+      
+      // Armazenar o ID para saber que estamos editando
+      this.editingProductId = this.selectedProductId;
+      
+      // Fechar a modal
+      this.closeEditDialog();
+      
+      // Limpar mensagens
+      this.errorMessage = '';
+      this.successMessage = '';
+    }
   }
 
   // Carregar produtos para a lista de exclusão
@@ -149,27 +213,51 @@ export class CreateDishComponent implements OnInit {
     this.successMessage = '';
 
     const productData: Product = {
-      id: '',
+      id: this.editingProductId || '',
       name: this.form.value.name,
       description: this.form.value.description,
       price: this.form.value.price,
     };
 
-    this.productService.createProduct(productData).subscribe({
-      next: (createdProduct) => {
-        this.successMessage = `Prato "${createdProduct.name}" cadastrado com sucesso!`;
-        this.loading = false;
-        
-        setTimeout(() => {
-          this.router.navigate(['/novo-pedido'], {
-            state: { createdDish: createdProduct }
-          });
-        }, 2000);
-      },
-      error: (error) => {
-        this.handleError(error, 'criar');
-      }
+    // Se editingProductId existe, fazemos update. Senão, fazemos create
+    if (this.editingProductId) {
+      productData.id = this.editingProductId;
+      this.productService.updateProduct(productData).subscribe({
+        next: (updatedProduct) => {
+          this.successMessage = `Prato "${updatedProduct.name}" atualizado com sucesso!`;
+          this.loading = false;
+          this.resetFormAfterSave();
+        },
+        error: (error) => {
+          this.handleError(error, 'atualizar');
+        }
+      });
+    } else {
+      this.productService.createProduct(productData).subscribe({
+        next: (createdProduct) => {
+          this.successMessage = `Prato "${createdProduct.name}" cadastrado com sucesso!`;
+          this.loading = false;
+          
+          setTimeout(() => {
+            this.router.navigate(['/novo-pedido'], {
+              state: { createdDish: createdProduct }
+            });
+          }, 2000);
+        },
+        error: (error) => {
+          this.handleError(error, 'criar');
+        }
+      });
+    }
+  }
+
+  private resetFormAfterSave(): void {
+    this.form.reset({
+      category: 'Pratos',
+      price: 0
     });
+    this.editingProductId = null;
+    this.errorMessage = '';
   }
 
   private handleError(error: any, action: string): void {

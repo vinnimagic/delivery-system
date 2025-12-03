@@ -6,6 +6,8 @@ import { Product } from '../../models/product.model';
 import { Order, OrderItem } from '../../models/order.model';
 import { ProductService } from '../../services/product.service';
 import { OrderService } from '../../services/order.service';
+import { DishService } from '../../services/dish.service';
+import { Dish } from '../../models/dish.models';
 
 @Component({
   selector: 'app-new-order',
@@ -15,7 +17,35 @@ import { OrderService } from '../../services/order.service';
     <div class="new-order-container">
       <div class="header">
         <h2>🍔 Novo Pedido</h2>
-        <button routerLink="/" class="btn-back">← Voltar para Início</button>
+        <div class="header-buttons">
+          <button (click)="toggleDishesModal()" class="btn-view-dishes">👀 Ver Todos os Pratos</button>
+          <button routerLink="/" class="btn-back">← Voltar para Início</button>
+        </div>
+      </div>
+
+      <!-- Modal de Todos os Pratos -->
+      <div class="dishes-modal-overlay" *ngIf="showDishesModal" (click)="closeDishesModal()">
+        <div class="dishes-modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>📋 Todos os Pratos Cadastrados</h3>
+            <button class="btn-close" (click)="closeDishesModal()">✕</button>
+          </div>
+          <div class="modal-content">
+            <div *ngIf="allDishes.length > 0" class="dishes-list">
+              <div *ngFor="let dish of allDishes" class="dish-item">
+                <div class="dish-info">
+                  <h4>{{dish.name}}</h4>
+                  <p class="dish-description">{{dish.description}}</p>
+                  <p class="dish-price"><strong>R$ {{dish.price ? dish.price.toFixed(2) : '0.00'}}</strong></p>
+                </div>
+                <button (click)="addDishToCart(dish)" class="btn-add-dish">+ Adicionar</button>
+              </div>
+            </div>
+            <div *ngIf="allDishes.length === 0" class="no-dishes">
+              <p>Nenhum prato cadastrado</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="order-steps">
@@ -42,9 +72,9 @@ import { OrderService } from '../../services/order.service';
               <p class="price">R$ {{product.price.toFixed(2)}}</p>
             </div>
             <div class="quantity-controls" *ngIf="isProductInCart(product)">
-              <button (click)="decreaseQuantity(product)" class="qty-btn">-</button>
+              <button (click)="decreaseQuantity(product, $event)" class="qty-btn">−</button>
               <span class="quantity">{{getProductQuantity(product)}}</span>
-              <button (click)="increaseQuantity(product)" class="qty-btn">+</button>
+              <button (click)="increaseQuantity(product, $event)" class="qty-btn">+</button>
             </div>
           </div>
         </div>
@@ -374,6 +404,158 @@ import { OrderService } from '../../services/order.service';
     .btn-confirm:hover:not(:disabled) {
       background: #ff5252;
     }
+    
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .btn-view-dishes {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 0.95rem;
+    }
+    
+    .btn-view-dishes:hover {
+      background: #1976d2;
+    }
+    
+    /* Modal Styles */
+    .dishes-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .dishes-modal {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      color: #333;
+    }
+    
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+    
+    .btn-close:hover {
+      background: #f0f0f0;
+    }
+    
+    .modal-content {
+      overflow-y: auto;
+      flex: 1;
+      padding: 20px;
+    }
+    
+    .dishes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .dish-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #f9f9f9;
+      transition: all 0.2s ease;
+    }
+    
+    .dish-item:hover {
+      background: #f0f7ff;
+      border-color: #2196f3;
+    }
+    
+    .dish-info {
+      flex: 1;
+      margin-right: 15px;
+    }
+    
+    .dish-item h4 {
+      margin: 0 0 5px 0;
+      color: #333;
+      font-size: 1.1rem;
+    }
+    
+    .dish-description {
+      margin: 0 0 8px 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .dish-price {
+      margin: 0;
+      color: #e91e63;
+      font-size: 1rem;
+    }
+    
+    .btn-add-dish {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .btn-add-dish:hover {
+      background: #45a049;
+    }
+    
+    .no-dishes {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
   `]
 })
 export class NewOrderComponent implements OnInit {
@@ -384,10 +566,15 @@ export class NewOrderComponent implements OnInit {
   isSubmitting = false;
   // If navigated from CriarPratos, we'll receive the created dish in history.state
   pendingCreatedDish: any = null;
+  
+  // Modal properties
+  showDishesModal = false;
+  allDishes: Dish[] = [];
 
   constructor(
     private productService: ProductService,
     private orderService: OrderService,
+    private dishService: DishService,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -470,17 +657,59 @@ export class NewOrderComponent implements OnInit {
     return item ? item.quantity : 0;
   }
 
-  increaseQuantity(product: Product): void {
-    const item = this.cartItems.find(i => i.productId === product.id);
-    if (item) {
-      item.quantity++;
-    }
+increaseQuantity(product: Product, event: Event): void {
+  event.stopPropagation(); // Impede que o clique chegue ao product-card
+  const item = this.cartItems.find(i => i.productId === product.id);
+  if (item) {
+    item.quantity++;
   }
+}
 
-  decreaseQuantity(product: Product): void {
+  decreaseQuantity(product: Product, event: Event): void {
+    event.stopPropagation(); // Impede que o clique chegue ao product-card
     const item = this.cartItems.find(i => i.productId === product.id);
     if (item && item.quantity > 1) {
       item.quantity--;
+    }
+  }
+
+  toggleDishesModal(): void {
+    if (!this.showDishesModal) {
+      this.loadAllDishes();
+    }
+    this.showDishesModal = !this.showDishesModal;
+  }
+
+  closeDishesModal(): void {
+    this.showDishesModal = false;
+  }
+
+  loadAllDishes(): void {
+    this.dishService.findAll().subscribe({
+      next: (dishes: Dish[]) => {
+        this.allDishes = dishes;
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar pratos:', error);
+        this.allDishes = [];
+      }
+    });
+  }
+
+  addDishToCart(dish: Dish): void {
+    // Convertendo Dish para Product/OrderItem
+    const productId = dish.id ? String(dish.id) : `dish-${Date.now()}`;
+    const existingItem = this.cartItems.find(item => item.productId === productId);
+    
+    if (existingItem) {
+      existingItem.quantity++;
+    } else {
+      this.cartItems.push({
+        productId: productId,
+        productName: dish.name,
+        quantity: 1,
+        price: dish.price || 0
+      });
     }
   }
 

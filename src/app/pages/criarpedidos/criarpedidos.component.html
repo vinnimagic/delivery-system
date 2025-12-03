@@ -75,10 +75,10 @@
       
       <button 
         type="button" 
-        class="btn btn-clear"
-        (click)="resetForm()"
+        class="btn btn-edit"
+        (click)="openEditDialog()"
         [disabled]="loading">
-        🧹 Limpar
+        ✏️ Editar Prato
       </button>
       
       <!-- BOTÃO EXCLUIR PRATO (sempre visível) -->
@@ -99,6 +99,52 @@
     </div>
 
   </form>
+
+  <!-- Modal/Dialog para editar prato -->
+  <div *ngIf="showEditDialog" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Selecionar Prato para Editar</h3>
+      
+      <div *ngIf="loadingProducts" class="loading">
+        Carregando pratos...
+      </div>
+      
+      <div *ngIf="products.length === 0 && !loadingProducts" class="no-products">
+        Nenhum prato cadastrado.
+      </div>
+      
+      <div class="products-list" *ngIf="products.length > 0">
+        <div 
+          *ngFor="let product of products" 
+          class="product-item"
+          [class.selected]="selectedProductId === product.id"
+          (click)="selectProductForEdit(product.id)">
+          <div class="product-info">
+            <strong>{{ product.name }}</strong>
+            <p>{{ product.description }}</p>
+            <small>Preço: R$ {{ product.price }}</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          (click)="closeEditDialog()">
+          Cancelar
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="loadSelectedDishForEdit()"
+          [disabled]="!selectedProductId">
+          Editar Prato
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal/Dialog para selecionar prato a excluir -->
   <div *ngIf="showDeleteDialog" class="modal-overlay">
