@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { RouterOutlet, RouterModule } from '@angular/router'; 
+
 
 @Component({
   selector: 'app-root',
@@ -14,10 +15,11 @@ import { RouterOutlet, RouterModule } from '@angular/router';
           <a routerLink="/novo-pedido" class="nav-link">Fazer Pedido</a>
           <a routerLink="/restaurante" class="nav-link">Restaurante</a>
           <a routerLink="/criarpedidos" class="nav-link">Criar Pratos</a>
+          <app-menu-popup></app-menu-popup>
         </div>
       </div>
     </nav>
-    
+      
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
